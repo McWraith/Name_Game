@@ -1,7 +1,6 @@
 # History files
 .Rhistory
 .Rapp.history
-.Rprofile
 
 # Session Data files
 .RData
@@ -20,6 +19,7 @@
 
 # RStudio files
 .Rproj.user/
+.Rprofile
 
 # produced vignettes
 vignettes/*.html
@@ -35,6 +35,10 @@ vignettes/*.pdf
 # Temporary files created by R markdown
 *.utf8.md
 *.knit.md
+
+# Temporary and secret files
+sandpit.R
+secret
 
 # Package management files
 renv/

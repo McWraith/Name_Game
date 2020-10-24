@@ -13,12 +13,17 @@ library(shinydashboard)
 library(shinycssloaders)
 library(rtweet)
 
-##### Shiny Ui
+##### Shiny Ui #####
 
-ui <- dashboardPage()
+ui <- dashboardPage(
+  dashboardHeader(title = "Name Game Dashboard",
+                  titleWidth = "300px"),
+  dashboardSidebar(),
+  dashboardBody()
+)
 
 
-##### Shiny Server
+##### Shiny Server #####
 
 server <- function(input, output, session) {
   
