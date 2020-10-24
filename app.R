@@ -26,6 +26,16 @@ ui <- dashboardPage(
 ##### Shiny Server #####
 
 server <- function(input, output, session) {
+  ##### Twitter API setup
+  source("secret")
+  
+  token <- rtweet::create_token(app = app, 
+                                consumer_key = consumer_key, 
+                                consumer_secret = consumer_secret,
+                                access_token = access_token,
+                                access_secret = access_secret,
+                                set_renv = FALSE) # Needs to be set to TRUE on first run
+  
   
 }
 
