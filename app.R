@@ -42,13 +42,23 @@ ui <- dashboardPage(
                                               min = 1, max = 4, value = 2)),
                            column(width = 4,  
                                   actionButton("teams_button", "Form teams"))
-                         )),
+                         )
+                  ),
                   column(width = 4,
-                         DTOutput("teams_dt"))
+                         DTOutput("teams_dt")
+                  )
                 )
               )
       ),
-      tabItem(tabName = "tab_game")
+      tabItem(tabName = "tab_game",
+              fluidPage(
+                fluidRow(
+                  column(width = 4),
+                  column(width = 4),
+                  column(width = 4)
+                )
+              )
+      )
     )
   )
 )
@@ -57,6 +67,8 @@ ui <- dashboardPage(
 ##### Shiny Server #####
 
 server <- function(input, output, session) {
+  
+  rv <- reactiveValues()
   
   ## Tab: Game setup -----------------------------------------------------------
   
@@ -69,6 +81,7 @@ server <- function(input, output, session) {
     players
   })
   
+  # Display players
   output$players_dt <- renderDT({
     datatable(players(),
               selection = "none",
@@ -101,6 +114,7 @@ server <- function(input, output, session) {
       arrange(Team)
   })
   
+  # Display teams
   output$teams_dt <- renderDT({
     datatable(player_groups(),
               selection = "none",
@@ -109,6 +123,14 @@ server <- function(input, output, session) {
               )
     )
   })
+  
+  ## Tab: Game -----------------------------------------------------------------
+  
+  # Import words collection
+  tmp_path <- fs::file_temp(ext = "csv")
+  drive_download("Name_Game/names", path = tmp_path)
+  rv$names <- read_csv(tmp_path, col_types = "c")
+  fs::file_delete(tmp_path)
   
 }
 
