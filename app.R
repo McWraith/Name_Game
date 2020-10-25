@@ -24,10 +24,8 @@ ui <- dashboardPage(
   dashboardHeader(title = "Name Game Dashboard",
                   titleWidth = "300px"),
   dashboardSidebar(
-    sidebarMenu(
-      menuItem("Game setup", tabName = "tab_teams",
-               sliderInput("teams_slider", "Number of teams",
-                           min = 1, max = 4, value = 2)),
+    sidebarMenu(id = "tabs",
+      menuItem("Game setup", tabName = "tab_teams"),
       menuItem("Game", tabName = "tab_game")
     )
   ),
@@ -38,7 +36,15 @@ ui <- dashboardPage(
                 fluidRow(
                   column(width = 4, 
                          DTOutput("players_dt"),
-                         actionButton("teams_button", "From teams"))
+                         fluidRow(
+                           column(width = 8, 
+                                  sliderInput("teams_slider", "Number of teams",
+                                              min = 1, max = 4, value = 2)),
+                           column(width = 4,  
+                                  actionButton("teams_button", "Form teams"))
+                         )),
+                  column(width = 4,
+                         DTOutput("teams_dt"))
                 )
               )
       ),
@@ -64,7 +70,6 @@ server <- function(input, output, session) {
   })
   
   output$players_dt <- renderDT({
-    
     datatable(players(),
               selection = "none",
               options = list(
@@ -76,7 +81,33 @@ server <- function(input, output, session) {
   # Create random groups
   player_groups <- eventReactive(input$teams_button, {
     players_df <- players()
-    
+
+    no_teams <- input$teams_slider
+    groupings <- str_glue("Team {seq(1:no_teams)}")
+
+    if(nrow(players_df)==no_teams){
+      teams <- groupings
+    }else if(nrow(players_df)%%no_teams==0) {
+      teams <- rep(groupings, no_teams)
+    } else {
+      teams <- rep(groupings, floor(nrow(players_df)/no_teams))
+      extra <- groupings[1:floor(nrow(players_df)%%no_teams)]
+      teams <- append(teams, extra)
+    }
+
+    players_teams <- players_df %>%
+      slice_sample(prop = 1) %>%
+      mutate(Team = teams) %>%
+      arrange(Team)
+  })
+  
+  output$teams_dt <- renderDT({
+    datatable(player_groups(),
+              selection = "none",
+              options = list(
+                dom = "t"
+              )
+    )
   })
   
 }
