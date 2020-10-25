@@ -39,6 +39,9 @@ vignettes/*.pdf
 # Temporary and secret files
 sandpit.R
 secret
+*.csv
+*.txt
+*.tmp
 
 # Package management files
 renv/
