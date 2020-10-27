@@ -42,6 +42,7 @@ secret
 *.csv
 *.txt
 *.tmp
+\.secrets/
 
 # Package management files
 renv/

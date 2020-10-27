@@ -11,12 +11,12 @@ library(tidyr)
 library(stringr)
 library(readr)
 library(googledrive)
-library(tidylog)
 library(shiny)
 library(shinydashboard)
 library(shinycssloaders)
 library(DT)
 library(rtweet)
+library(tidylog)
 
 source("Googledocs_auxiliary_functions.R")
 
@@ -76,11 +76,7 @@ server <- function(input, output, session) {
   
   # Import Players
   players <- reactive({
-    tmp_path <- fs::file_temp(ext = "csv")
-    drive_download("Name_Game/players", path = tmp_path)
-    players <- read_csv(tmp_path, col_types = "c")
-    fs::file_delete(tmp_path)
-    players
+    gd_download("Name_Game/players")
   })
   
   # Display players
@@ -129,10 +125,8 @@ server <- function(input, output, session) {
   ## Tab: Game -----------------------------------------------------------------
   
   # Import words collection
-  tmp_path <- fs::file_temp(ext = "csv")
-  drive_download("Name_Game/names", path = tmp_path)
-  rv$names <- read_csv(tmp_path, col_types = "c")
-  fs::file_delete(tmp_path)
+  rv$names <- gd_download("Name_Game/names")
+
   
 }
 
