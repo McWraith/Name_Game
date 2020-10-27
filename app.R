@@ -5,7 +5,7 @@
 
 ##### Project Setup #####
 
-# Load libraries
+# Load libraries and functions
 library(dplyr)
 library(tidyr)
 library(stringr)
@@ -17,6 +17,8 @@ library(shinydashboard)
 library(shinycssloaders)
 library(DT)
 library(rtweet)
+
+source("Googledocs_auxiliary_functions.R")
 
 ##### Shiny Ui #####
 
