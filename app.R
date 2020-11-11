@@ -18,6 +18,9 @@ library(DT)
 library(rtweet)
 library(tidylog)
 
+options(gargle_oauth_cache = ".secrets")
+drive_auth(cache = ".secrets")
+
 source("Googledocs_auxiliary_functions.R")
 
 ##### Shiny Ui #####
