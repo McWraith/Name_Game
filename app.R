@@ -19,7 +19,7 @@ library(rtweet)
 library(tidylog)
 
 options(gargle_oauth_cache = ".secrets")
-drive_auth(cache = ".secrets")
+drive_auth(cache = ".secrets", email = TRUE)
 
 source("Googledocs_auxiliary_functions.R")
 
@@ -58,9 +58,52 @@ ui <- dashboardPage(
       tabItem(tabName = "tab_game",
               fluidPage(
                 fluidRow(
-                  column(width = 4),
-                  column(width = 4),
-                  column(width = 4)
+                  column(
+                    width = 12,
+                    box(htmlOutput("cur_round"))
+                  )
+                ),
+                fluidRow(
+                  column(width = 4,
+                         box(title = "Current Team",
+                             width = 6,
+                             solidHeader = TRUE,
+                             htmlOutput("cur_team")),
+                         box(title = "Current Player",
+                             width = 6,
+                             solidHeader = TRUE,
+                             htmlOutput("cur_player"))
+                  ),
+                  column(width = 4,
+                         box(title = "Names left in the hat",
+                             width = 6,
+                             solidHeader = TRUE,
+                             htmlOutput("hat")),
+                         box(title = "Timer",
+                             width = 6,
+                             solidHeader = TRUE,
+                             htmlOutput("timer"))
+                  ),
+                  column(width = 4,
+                         box(title = "Current Scores",
+                             width = 12,
+                             solidHeader = TRUE,
+                             DTOutput("team_score_dt"))
+                  )
+                ),
+                fluidRow(
+                  column(
+                    width = 3,
+                    actionButton("game_start", label = "Start")
+                  ),
+                  column(
+                    width = 3,
+                    actionButton("score_plus", label = "Correct")
+                  ),
+                  column(
+                    width = 3,
+                    actionButton("score_pass", label = "PASS")
+                  )
                 )
               )
       )
@@ -129,7 +172,26 @@ server <- function(input, output, session) {
   
   # Import words collection
   rv$names <- gd_download("Name_Game/names")
-
+  
+  # timer_start <- eventReactive(
+  #   input$game_start, {
+  #     time_init <- lubridate::period(60)
+  #   })
+  
+  timer_init <- reactiveTimer()
+  
+  observeEvent(
+    input$game_start, {
+    rv$timer_init <- 60
+  })
+  
+  output$timer <- renderUI({
+    #timer_init()
+    #invalidateLater(1000)
+    rv$timer_init <- rv$timer_init - 1
+    HTML(paste(rv$timer_init))
+  })
+  
   
 }
 
