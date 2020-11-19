@@ -160,6 +160,7 @@ server <- function(input, output, session) {
   
   # Display teams
   output$teams_dt <- renderDT({
+    group_test <<- player_groups()
     datatable(player_groups(),
               selection = "none",
               options = list(
@@ -169,22 +170,44 @@ server <- function(input, output, session) {
   })
   
   ## Tab: Game -----------------------------------------------------------------
-  
+
+  # Hat ----
   # Import words collection
   rv$names <- gd_download("Name_Game/names")
 
+  hat_n <- reactiveVal(nrow(isolate(rv$names))+1)
+  
+  hat <- eventReactive(input$score_plus, {
+    hat_n(hat_n()-1)
+    hat_n()
+  }, ignoreNULL = FALSE)
+  
+  output$hat <- renderUI({
+    HTML(paste(hat()))
+  })
+  
+  # Timer ----
   timer <- reactiveVal(0)
+  timer_active <- reactiveVal(FALSE)
   
   observeEvent(
     input$game_start, {
-    timer(60)
-  }, ignoreInit = TRUE)
+    timer(10)
+    timer_active(TRUE)
+  })
   
   observe({
     invalidateLater(1000, session)
     isolate({
-      if(timer() > 0){
-        timer(timer()-1)
+      if(timer_active()){
+        if(timer() > 0){
+          timer(timer() - 1)
+        } else {
+          timer_active(FALSE)
+          showModal(
+            modalDialog("Time's Up!")
+          )
+        }
       }
     })
   })
