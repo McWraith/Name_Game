@@ -82,7 +82,7 @@ ui <- dashboardPage(
                          box(title = "Timer",
                              width = 6,
                              solidHeader = TRUE,
-                             htmlOutput("timer"))
+                             htmlOutput("timerUI"))
                   ),
                   column(width = 4,
                          box(title = "Current Scores",
@@ -172,24 +172,25 @@ server <- function(input, output, session) {
   
   # Import words collection
   rv$names <- gd_download("Name_Game/names")
-  
-  # timer_start <- eventReactive(
-  #   input$game_start, {
-  #     time_init <- lubridate::period(60)
-  #   })
-  
-  timer_init <- reactiveTimer()
+
+  timer <- reactiveVal(0)
   
   observeEvent(
     input$game_start, {
-    rv$timer_init <- 60
+    timer(60)
+  }, ignoreInit = TRUE)
+  
+  observe({
+    invalidateLater(1000, session)
+    isolate({
+      if(timer() > 0){
+        timer(timer()-1)
+      }
+    })
   })
   
-  output$timer <- renderUI({
-    #timer_init()
-    #invalidateLater(1000)
-    rv$timer_init <- rv$timer_init - 1
-    HTML(paste(rv$timer_init))
+  output$timerUI <- renderUI({
+    HTML(paste(timer()))
   })
   
   
