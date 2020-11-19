@@ -104,6 +104,11 @@ ui <- dashboardPage(
                     width = 3,
                     actionButton("score_pass", label = "PASS")
                   )
+                ),
+                fluidRow(
+                  column(3, textOutput("test_in")),
+                  column(3, textOutput("test_guess")),
+                  column(3, textOutput("test_left"))
                 )
               )
       )
@@ -160,7 +165,6 @@ server <- function(input, output, session) {
   
   # Display teams
   output$teams_dt <- renderDT({
-    group_test <<- player_groups()
     datatable(player_groups(),
               selection = "none",
               options = list(
@@ -174,16 +178,45 @@ server <- function(input, output, session) {
   # Hat ----
   # Import words collection
   rv$names <- gd_download("Name_Game/names")
+  rv$in_hat <- tibble(Name = character())
+  rv$out_hat <- tibble(Name = character())
+  rv$cur_guess <- tibble(Name = character())
 
-  hat_n <- reactiveVal(nrow(isolate(rv$names))+1)
+  hat_n <- reactiveVal(nrow(isolate(rv$names)) + 1)
   
-  hat <- eventReactive(input$score_plus, {
-    hat_n(hat_n()-1)
+  observeEvent(input$game_start, {
+    rv$in_hat <- rv$names
+    rv$cur_guess <- rv$in_hat %>%
+      slice_sample(n = 1)
+  })
+  
+  observeEvent(input$score_plus, {
+    rv$out_hat <- rv$out_hat %>%
+      bind_rows(rv$cur_guess)
+    rv$in_hat <- rv$in_hat %>%
+      anti_join(rv$cur_guess)
+    rv$cur_guess <- rv$in_hat %>%
+      slice_sample(n = 1)
+  })
+  
+  hat_left <- eventReactive(input$score_plus | 
+                              input$game_start, {
+    hat_n(hat_n() - 1)
     hat_n()
-  }, ignoreNULL = FALSE)
+  }, ignoreNULL = TRUE)
   
   output$hat <- renderUI({
-    HTML(paste(hat()))
+    HTML(paste(hat_left()))
+  })
+  
+  output$test_in <- renderText({
+    rv$in_hat %>% pull(Name)
+  })
+  output$test_guess <- renderText({
+    rv$cur_guess %>% pull(Name)
+  })
+  output$test_left <- renderText({
+    rv$out_hat %>% pull(Name)
   })
   
   # Timer ----
@@ -192,7 +225,7 @@ server <- function(input, output, session) {
   
   observeEvent(
     input$game_start, {
-    timer(10)
+    timer(60)
     timer_active(TRUE)
   })
   
